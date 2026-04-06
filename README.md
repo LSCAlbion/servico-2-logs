@@ -1,58 +1,84 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Serviço 2 – API de Logs (PHP / Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este serviço faz parte da arquitetura distribuída do sistema de **TODO List**. Ele atua como uma API independente, responsável por receber, processar e registrar no banco de dados todos os eventos importantes gerados pelo Serviço 1 (criação de tarefas, erros, acessos indevidos, etc.).
 
-## About Laravel
+## 🚀 Tecnologias Utilizadas
+- **PHP 8+**
+- **Laravel 11+** (Framework e API nativa)
+- **Eloquent ORM** (Manipulação do banco de dados)
+- **SQLite** (Banco de dados leve e embutido)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ⚙️ Como rodar o projeto localmente
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Como este projeto utiliza SQLite, você não precisa configurar um servidor MySQL complexo. Siga os passos abaixo:
 
-## Learning Laravel
+**1. Clone o repositório**
+\`\`\`bash
+git clone https://github.com/LSCAlbion/servico-2-logs.git
+cd servico-2-logs
+\`\`\`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**2. Instale as dependências**
+\`\`\`bash
+composer install
+\`\`\`
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**3. Configure o ambiente (.env)**
+Faça uma cópia do arquivo de exemplo para criar o seu próprio `.env`:
+\`\`\`bash
+cp .env.example .env
+\`\`\`
+Abra o arquivo `.env` recém-criado, **apague as configurações de banco de dados existentes (DB_...)** e deixe apenas a seguinte linha para ativar o SQLite:
+\`\`\`env
+DB_CONNECTION=sqlite
+\`\`\`
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+**4. Crie as tabelas no banco de dados**
+Rode o comando de migração. Se o terminal perguntar se deseja criar o arquivo `database.sqlite`, digite **yes**.
+\`\`\`bash
+php artisan migrate
+\`\`\`
 
-## Agentic Development
+**5. Inicie o servidor (Porta 8081)**
+Para evitar conflito de portas com o Serviço 1, rode esta API na porta 8081:
+\`\`\`bash
+php artisan serve --port=8081
+\`\`\`
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
-```bash
-composer require laravel/boost --dev
+## 📡 Integração (Endpoints da API)
 
-php artisan boost:install
-```
+### Registrar um novo log
+O Serviço 1 deve enviar uma requisição HTTP para este endpoint sempre que um evento ocorrer.
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- **URL:** `http://127.0.0.1:8081/api/logs`
+- **Método:** `POST`
+- **Headers:** `Content-Type: application/json`
 
-## Contributing
+**Exemplo de Corpo da Requisição (JSON):**
+\`\`\`json
+{
+  "acao": "criacao_tarefa",
+  "detalhe": "Tarefa 'Estudar Laravel' criada com sucesso.",
+  "usuarioId": 1
+}
+\`\`\`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Exemplo de Resposta de Sucesso (201 Created):**
+\`\`\`json
+{
+  "sucesso": true,
+  "mensagem": "Log registrado com sucesso!",
+  "dados": {
+    "acao": "criacao_tarefa",
+    "detalhe": "Tarefa 'Estudar Laravel' criada com sucesso.",
+    "usuarioId": 1,
+    "updated_at": "2024-05-20T14:30:00.000000Z",
+    "created_at": "2024-05-20T14:30:00.000000Z",
+    "id": 1
+  }
+}
+\`\`\`
